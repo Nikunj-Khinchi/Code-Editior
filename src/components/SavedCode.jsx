@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { arrayRemove, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../auth/Firebase"; // Import your Firebase configuration
-import { getAuth } from "firebase/auth";
 import CodeEditor from "./CodeEditor";
 import { defineTheme } from "../constants/AddTheme";
 import { toast } from "react-toastify";
