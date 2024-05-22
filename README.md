@@ -1,6 +1,6 @@
 # CodeEditor
 
-CodeSave is a web application that allows users to write, save, and manage code snippets in various programming languages. It provides an environment where users can execute their code in 45 different languages and customize their coding interface with 53 different themes.
+CodeEditor is a web application that allows users to write, save, execute and manage code snippets in various programming languages. It provides an environment where users can execute their code in 45 different languages and customize their coding interface with 53 different themes.
 
 ## Features
 
@@ -28,7 +28,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installation
 
-1. Clone the repo `git clone https://github.com/NikunjKhinchi/CodeEditor.git`
+1. Clone the repo `git clone https://github.com/Nikunj-Khinchi/Code-Editior`
 2. Install NPM packages `npm install`
 3. Enter your Firebase configuration in a `.env` file in the root of the project
 
