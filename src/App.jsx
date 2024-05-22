@@ -24,7 +24,7 @@ const PageTitle = () => {
   return null;
 };
 
-const App = () => {
+const WindowSet = () =>{
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -78,8 +78,13 @@ const App = () => {
       </>
     );
   }
+}
+
+const App = () => {
+ 
   return (
     <BrowserRouter>
+    <WindowSet />
       <PageTitle />
       <Routes>
         <Route path="/" element={<MainPage />} />

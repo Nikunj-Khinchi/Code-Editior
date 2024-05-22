@@ -33,3 +33,8 @@ dist-ssr
 .DS_Store
 *.log
 npm-debug.log*
+
+
+firebase.json
+firebase-debug.log
+.firebaserc
