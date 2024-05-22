@@ -60,6 +60,6 @@ After installing the dependencies, you can run the application with: `npm run de
 ### Preview
 
 <p float="left">
-  <img src="code-editor\public\Images\MainPage.png" width="100" />
-  <img src="code-editor\public\Images\Dashboard.png" width="100" /> 
+  <img src="/public/Images/MainPage.png" width="100" />
+  <img src="/public/Images/Dashboard.png" width="100" /> 
 </p>
