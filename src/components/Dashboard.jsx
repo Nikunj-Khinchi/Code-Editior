@@ -1,41 +1,24 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { db } from "../auth/Firebase";
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import desfultImage from "../assets/Images/defaultUser.png";
-import { getAuth } from "firebase/auth";
-import UserDetails from "./UserDetails";
+import { useSelector } from "react-redux";
+
+
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const reduxUserData = useSelector((state) => state.user);
+  
   useEffect(() => {
-    const unsubscribe = async () => {
-      const auth = getAuth();
-      const authUser = auth.currentUser;
-      if (authUser) {
-        // console.log("User is authenticated:", authUser);
-
-        const q = query(
-          collection(db, "users"),
-          where("uid", "==", authUser.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((document) => {
-          const userData = document.data();
-          setUser(userData);
-        });
-        setLoading(false);
-      } else {
-        console.log("No user is authenticated");
-        setUser(null);
-        setLoading(false);
-      }
-    };
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [user]);
+    if (reduxUserData) {
+      setUser(reduxUserData);
+      setLoading(false);
+    } else {
+      console.log("No user is authenticated");
+      setLoading(false);
+    }
+  }, [reduxUserData]);
 
 
   if (loading || user == null) {

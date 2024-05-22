@@ -29,11 +29,11 @@ import {
   where,
 } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
-
+import { useDispatch, useSelector } from "react-redux";
+import { login, logout } from "../redux/userSlice";
 // MainPage.js
 
-const javascriptDefault = 
-`// Bubble sort Implementation using Javascript
+const javascriptDefault = `// Bubble sort Implementation using Javascript
 // Creating the bblSort function
 function bblSort(arr) {
 
@@ -75,8 +75,8 @@ const MainPage = () => {
   // const [loading, setLoading] = useState(false);
   const enterPress = useKeyPress("Enter");
   const ctrlPress = useKeyPress("Control");
-
- 
+  const dispatch = useDispatch();
+  const reduxUserData = useSelector((state) => state.user);
 
   const onSelectChange = (sl) => {
     console.log("selected Option...", sl);
@@ -137,11 +137,7 @@ const MainPage = () => {
         checkStatus(token);
       })
       .catch((err) => {
-        // console.log(err);
         let error = err.response ? err.response.data : err;
-        // get error status
-        // let status = err.response.status;
-        // console.log("status", status);
         if (error.status === 429) {
           console.log("too many requests", status);
 
@@ -211,30 +207,13 @@ const MainPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [saveCodeLoad, setSaveCodeLoad] = useState(false);
+  const navigate = useNavigate();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const confirmLogout = () => {
-    setShowConfirmModal(true);
-  };
-
-  const handleLogout = async () => {
-   await auth
-      .signOut()
-      .then(() => {
-        // Sign-out successful.
-        setShowConfirmModal(false);
-        showSuccessToast("Sign-out successfully");
-        setUser(null);
-        console.log("Sign-out successful.");
-      })
-      .catch((error) => {
-        // An error happened.
-        console.log("An error happened.", error);
-      });
-  };
-
+  // Get the user's data from the database
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
       if (authUser) {
@@ -247,6 +226,15 @@ const MainPage = () => {
           const userData = document.data();
           console.log("User data:", userData);
           setUser(userData);
+          dispatch(
+            login({
+              uid: userData.uid,
+              displayName: userData.displayName,
+              email: userData.email,
+              phoneNumber: userData.phoneNumber,
+              photoURL: userData.photoURL,
+            })
+          );
           // setLoading(false);
         });
       } else {
@@ -258,39 +246,39 @@ const MainPage = () => {
     // eslint-disable-next-line
   }, []);
 
+  // Logout
+  const confirmLogout = () => {
+    setShowConfirmModal(true);
+  };
+
+  const handleLogout = async () => {
+    await auth
+      .signOut()
+      .then(() => {
+        // Sign-out successful.
+        setShowConfirmModal(false);
+        showSuccessToast("Sign-out successfully");
+        dispatch(logout());
+        setUser(null);
+        console.log("Sign-out successful.");
+      })
+      .catch((error) => {
+        // An error happened.
+        console.log("An error happened.", error);
+      });
+  };
+
+  // Auth status
   const handelAuthStatus = (data) => {
     console.log(data);
     showSuccessToast(data);
-  };
-
-  // Toast messages
-  const showSuccessToast = (msg) => {
-    toast.success(msg || `Compiled Successfully!`, {
-      position: "top-right",
-      autoClose: 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-  };
-  const showErrorToast = (msg, timer) => {
-    toast.error(msg || `Something went wrong! Please try again.`, {
-      position: "top-right",
-      autoClose: timer ? timer : 2000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
   };
 
   // Save code
   const db = getFirestore();
 
   const handleSave = async () => {
+    setSaveCodeLoad(true);
     // Ask for the name to store the code
     if (!user) {
       showErrorToast("Please login to save the code!");
@@ -324,6 +312,7 @@ const MainPage = () => {
         showErrorToast(
           "A code with this name already exists. Please use a different name."
         );
+        setSaveCodeLoad(false);
         return;
       }
     }
@@ -374,10 +363,10 @@ const MainPage = () => {
       });
     }
 
+    setSaveCodeLoad(false);
     showSuccessToast("Code saved successfully!");
     closeSaveModal();
   };
-
 
   const [saveModalIsOpen, saveSetModalIsOpen] = useState(false);
   const [codeName, setCodeName] = useState("");
@@ -392,9 +381,29 @@ const MainPage = () => {
     setCodeName("");
   };
 
-  const navigate = useNavigate();
-
-
+  // Toast messages
+  const showSuccessToast = (msg) => {
+    toast.success(msg || `Compiled Successfully!`, {
+      position: "top-right",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
+  const showErrorToast = (msg, timer) => {
+    toast.error(msg || `Something went wrong! Please try again.`, {
+      position: "top-right",
+      autoClose: timer ? timer : 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  };
 
   return (
     <>
@@ -437,7 +446,8 @@ const MainPage = () => {
               Save Code
             </button>
 
-            <Modal ariaHideApp={false}
+            <Modal
+              ariaHideApp={false}
               className={
                 "absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-md px-8 pt-6 pb-10 mb-4 "
               }
@@ -459,7 +469,7 @@ const MainPage = () => {
                   className="focus:outline-none w-[50%] p-1 border-2 border-black  rounded-md shadow-[5px_5px_0px_0px_rgba(0,0,0)]  hover:shadow transition duration-200  mt-2  bg-green-400 hover:bg-green-600"
                   onClick={handleSave}
                 >
-                  Save
+                  {saveCodeLoad ? "Saving..." : "Save"}
                 </button>
                 <button
                   className="focus:outline-none w-[50%] p-1 border-2 border-black  rounded-md shadow-[5px_5px_0px_0px_rgba(0,0,0)]  hover:shadow transition duration-200 bg-white mt-2"
@@ -486,7 +496,7 @@ const MainPage = () => {
               <div className="w-full flex items-center">
                 <img
                   className="h-10 w-10 rounded-full mr-4"
-                  src={user.photoURL}
+                  src={reduxUserData.photoURL}
                   alt="User profile"
                 />
                 <div className="font-bold">
@@ -497,7 +507,7 @@ const MainPage = () => {
                       navigate("/dashboard/user-details");
                     }}
                   >
-                    {user.displayName}
+                    {reduxUserData.displayName}
                   </p>
                 </div>
               </div>
@@ -511,7 +521,8 @@ const MainPage = () => {
               </div>
             </div>
           )}
-          <Modal ariaHideApp={false}
+          <Modal
+            ariaHideApp={false}
             isOpen={isModalOpen}
             onRequestClose={closeModal}
             className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-md px-8 pt-6 pb-10 mb-4 
@@ -582,6 +593,9 @@ const MainPage = () => {
           {outputDetails && <OutputDetails outputDetails={outputDetails} />}
         </div>
       </div>
+      <footer className="bg-gray-800 text-white text-center p-4 mt-8">
+        &copy; {new Date().getFullYear()} Nikunj Khinchi
+      </footer>
     </>
   );
 };

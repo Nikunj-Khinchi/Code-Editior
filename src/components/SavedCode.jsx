@@ -1,16 +1,12 @@
 import { useState, useEffect } from "react";
-import {
-  arrayRemove,
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
+import { arrayRemove, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../auth/Firebase"; // Import your Firebase configuration
 import { getAuth } from "firebase/auth";
 import CodeEditor from "./CodeEditor";
 import { defineTheme } from "../constants/AddTheme";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const SavedCode = () => {
   const [theme, setTheme] = useState("");
@@ -29,25 +25,40 @@ const SavedCode = () => {
   const [fileToDelete, setFileToDelete] = useState(null);
   const [showDeleteFileModal, setShowDeleteFileModal] = useState(false);
 
-  const auth = getAuth();
-  const user = auth.currentUser;
-
+  const user = useSelector((state) => state.user);
+  console.log("user", user);
   useEffect(() => {
     const fetchSavedCode = async () => {
       const userDocRef = doc(db, "CodeSave", user.uid); // Replace user.uid with the actual user ID
       const userDocSnap = await getDoc(userDocRef);
 
+      //   if (userDocSnap.exists()) {
+      //     const userData = userDocSnap.data();
+      //     setLanguages(userData.languages);
+      //   }
+      //   // Assume that the languages are stored in userDocSnap.data().languages
+      //   const fetchedLanguages = userDocSnap.data().languages;
+      //   setLanguages(fetchedLanguages);
+
+      //   // Set the first language as the selected language
+      //   if (fetchedLanguages.length > 0) {
+      //     setSelectedLanguage(fetchedLanguages[0]);
+      //   }
+      // };
       if (userDocSnap.exists()) {
         const userData = userDocSnap.data();
-        setLanguages(userData.languages);
-      }
-      // Assume that the languages are stored in userDocSnap.data().languages
-      const fetchedLanguages = userDocSnap.data().languages;
-      setLanguages(fetchedLanguages);
+        if (userData && userData.languages) {
+          setLanguages(userData.languages);
 
-      // Set the first language as the selected language
-      if (fetchedLanguages.length > 0) {
-        setSelectedLanguage(fetchedLanguages[0]);
+          // Set the first language as the selected language
+          if (userData.languages.length > 0) {
+            setSelectedLanguage(userData.languages[0]);
+          }
+        } else {
+          console.log("No saved code found.");
+        }
+      } else {
+        console.log("No saved code found.");
       }
     };
 
@@ -150,7 +161,9 @@ const SavedCode = () => {
           );
           selectedLanguage?.name === languageToDelete.name &&
             setSelectedLanguage(null);
-          toast.success(`${languageToDelete.name.toUpperCase()} Language successfully Deleted!`);
+          toast.success(
+            `${languageToDelete.name.toUpperCase()} Language successfully Deleted!`
+          );
         })
         .catch((error) => {
           console.error("Error removing document: ", error);

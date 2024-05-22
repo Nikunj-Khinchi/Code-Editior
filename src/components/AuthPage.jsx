@@ -23,12 +23,13 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   // initialize firestore
   const db = getFirestore();
 
   const handleLogin = async () => {
     setError(null);
+    setLoading(true);
     try {
       // check if email and password isnt empty
       if (!email || !password) {
@@ -44,8 +45,9 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
           const user = userCredential.user;
           console.log(user);
           AuthSuccess("Login Successfully");
+          
           onClose();
-
+          setLoading(false);
 
         })
         .catch((error) => {
@@ -62,6 +64,7 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
 
   const handleSignup = async () => {
     setError(null);
+    setLoading(true);
     try {
       // check if email, password, name and phone number isnt empty
       if (!email || !password || !name || !phoneNumber) {
@@ -107,7 +110,11 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
               // An error occurred
               console.error("Error updating user profile: ", error);
             });
+
+            setLoading(false);
         })
+
+
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
@@ -277,14 +284,14 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
             className="focus:outline-none w-[50%] p-1 border-2 border-black  rounded-md shadow-[5px_5px_0px_0px_rgba(0,0,0)]  hover:shadow transition duration-200 bg-white mt-2"
             onClick={handleLogin}
           >
-            Login
+            { loading ? "Login..." :"Login"}
           </button>
         ) : (
           <button
             className="focus:outline-none w-[50%] p-1 border-2 border-black  rounded-md shadow-[5px_5px_0px_0px_rgba(0,0,0)]  hover:shadow transition duration-200 bg-white mt-2"
             onClick={handleSignup}
           >
-            Signup
+            {loading ? "Sign up..." : "Sign up"}
           </button>
         )}
         <button

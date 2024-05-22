@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from 'react-toastify';
+import { useSelector } from "react-redux";
 const UserDetails = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userDetails, setUserDetails] = useState({
@@ -16,40 +17,21 @@ const UserDetails = () => {
     email: "",
     phoneNumber: "",
   });
-  const [user, setUser] = useState(null);
+
   const [loading, setLoading] = useState(true);
 
+  const reduxUserData = useSelector((state) => state.user);
+
+
   useEffect(() => {
-    const unsubscribe = async()=> {
-      const auth = getAuth();
-
-      const authUser = auth.currentUser;
-      if (authUser) {
-        setUser(authUser);
-
-        const q = query(
-          collection(db, "users"),
-          where("uid", "==", authUser.uid)
-        );
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((document) => {
-          const userData = document.data();
-          setUserDetails({
-            displayName: userData.displayName,
-            email: userData.email,
-            phoneNumber: userData.phoneNumber || "",
-            photoURL: userData.photoURL,
-          });
-        });
-
-        setLoading(false);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    return () => unsubscribe();
-  }, []);
+    if (reduxUserData) {
+      setUserDetails(reduxUserData);
+      setLoading(false);
+    } else {
+      console.log("No user is authenticated");
+      setLoading(false);
+    }
+  }, [reduxUserData]);
 
   const handleEdit = () => {
     setIsEditing(!isEditing);
@@ -60,8 +42,8 @@ const UserDetails = () => {
   };
 
   const handleSave = async () => {
-    if (user) {
-      const q = query(collection(db, "users"), where("uid", "==", user.uid));
+    if (reduxUserData.uid) {
+      const q = query(collection(db, "users"), where("uid", "==", reduxUserData.uid));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((document) => {
         updateDoc(document.ref, userDetails);
@@ -84,7 +66,7 @@ const UserDetails = () => {
     );
   }
 
-  if (!user) {
+  if (!reduxUserData.uid) {
     return (
       <div className="flex items-center justify-center h-screen">
         <h1 className="text-lg tracking-widest">No user logged in</h1>
@@ -124,7 +106,7 @@ const UserDetails = () => {
         </div>
       <div className="flex justify-center items-center mb-6">
         <div className="flex flex-col gap-2"> 
-        {/* <h2 className="text-2xl font-semibold">User Details</h2> */}
+       
         <img
           className="h-20 w-20 rounded-full border-2 border-red-500 hover:scale-105 transition duration-300"
           src={userDetails.photoURL ? userDetails.photoURL : "path/to/default/image.jpg"} // replace with your default image path
