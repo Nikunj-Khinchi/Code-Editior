@@ -56,6 +56,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 After installing the dependencies, you can run the application with: `npm run dev`
 
+### Live Demo
+
+You can view a live demo of the application at [https://code-editior-nikunj.vercel.app/](https://code-editior-nikunj.vercel.app/)
+
+
 ### Preview
 
 <p float="left">
