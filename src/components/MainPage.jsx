@@ -205,7 +205,6 @@ const MainPage = () => {
 
   // firsebase auth
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [saveCodeLoad, setSaveCodeLoad] = useState(false);
   const navigate = useNavigate();
@@ -225,7 +224,6 @@ const MainPage = () => {
         querySnapshot.forEach((document) => {
           const userData = document.data();
           console.log("User data:", userData);
-          setUser(userData);
           dispatch(
             login({
               uid: userData.uid,
@@ -259,7 +257,6 @@ const MainPage = () => {
         setShowConfirmModal(false);
         showSuccessToast("Sign-out successfully");
         dispatch(logout());
-        setUser(null);
         console.log("Sign-out successful.");
       })
       .catch((error) => {
@@ -280,7 +277,7 @@ const MainPage = () => {
   const handleSave = async () => {
     setSaveCodeLoad(true);
     // Ask for the name to store the code
-    if (!user) {
+    if (!reduxUserData.uid) {
       showErrorToast("Please login to save the code!");
       return;
     }
@@ -289,7 +286,7 @@ const MainPage = () => {
       return;
     }
     // Get a reference to the user's document in the database
-    const userDocRef = doc(db, "CodeSave", user.uid);
+    const userDocRef = doc(db, "CodeSave", reduxUserData.uid);
 
     // Get the user's document
 
@@ -483,7 +480,7 @@ const MainPage = () => {
         </div>
 
         <div className="px-4 pt-2 pb-0 ">
-          {!user && (
+          {!reduxUserData.uid && (
             <button
               className="focus:outline-none p-[0.4rem] w-full border-2 border-black  rounded-md shadow-[5px_5px_0px_0px_rgba(0,0,0)]  hover:shadow transition duration-200 bg-white mt-2 tracking-wider"
               onClick={openModal}
@@ -491,7 +488,7 @@ const MainPage = () => {
               Login/Signup
             </button>
           )}
-          {user && (
+          {reduxUserData.uid && (
             <div className="w-full grid grid-flow-col gap-8 pr-4 items-center">
               <div className="w-full flex items-center">
                 <img

@@ -163,8 +163,6 @@ const AuthPage = ({ onClose, AuthSuccess }) => {
         .then(async (result) => {
           // Signed in with Google
           const user = result.user;
-   
-
           const photo = user.photoURL;
           console.log(photo);
 
